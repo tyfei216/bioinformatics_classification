@@ -26,14 +26,14 @@ transc =  transforms.Compose([
     transforms.Resize(image_size),
     transforms.CenterCrop(image_size),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
+    transforms.Normalize(mean=[.5], std=[.5])
 ])
 
 trans =  transforms.Compose([
     # transforms.Resize(image_size),
     # transforms.CenterCrop(image_size),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
+    transforms.Normalize(mean=[.5], std=[.5])
 ])
 
 class dataset2(data.Dataset):
@@ -81,6 +81,7 @@ class dataset2(data.Dataset):
             imgpath = self.neg[index]
             if self.corp:
                 img = cv2.imread(imgpath)
+                 
                 img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
                 img_out = cv2.resize(img_gray, (image_size, image_size))
                 img_out = Image.fromarray(img_out)
@@ -206,7 +207,7 @@ class dataset3(data.Dataset):
         return len(self.pos1)+len(self.neg)+len(self.pos2) 
 
 
-def getdataset3(pathpos1, pathneg1, pathpos2, pathneg2, batchSize, split=None, transforms = None, corp = False):
+def getdataset3(pathpos1, pathneg1, pathpos2, pathneg2, batchSize, split=None, transforms = None, corp = False, iftest = False):
     dataset = dataset3(pathpos1, pathneg1, pathpos2, pathneg2, corp, transforms)
     if split:
         indices = picload(split)
@@ -221,11 +222,15 @@ def getdataset3(pathpos1, pathneg1, pathpos2, pathneg2, batchSize, split=None, t
     test_sampler = data.SubsetRandomSampler(test_indices)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=batchSize, 
                                            sampler=train_sampler,shuffle=True)
-    test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
+    if iftest:
+        test_loader = torch.utils.data.DataLoader(dataset, batch_size=split, 
+                                           sampler=test_sampler,shuffle=True)
+    else:
+        test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
                                            sampler=test_sampler,shuffle=True)
     return train_loader, test_loader, indices
 
-def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp = False):
+def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp = False, iftest=True):
     dataset = dataset2(pathpos, pathneg, corp, transforms)
     if split:
         indices = picload(split)
@@ -240,7 +245,11 @@ def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp
     test_sampler = data.SubsetRandomSampler(test_indices)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=batchSize, 
                                            sampler=train_sampler)
-    test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
+    if iftest:
+        test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
+                                           sampler=test_sampler)
+    else:
+        test_loader = torch.utils.data.DataLoader(dataset, batch_size=split, 
                                            sampler=test_sampler)
     return train_loader, test_loader, indices
 
