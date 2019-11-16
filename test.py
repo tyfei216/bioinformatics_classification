@@ -14,6 +14,8 @@ import argparse
 #from skimage import io
 from matplotlib import pyplot as plt
 
+from sklearn.metrics import confusion_matrix
+
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
@@ -29,6 +31,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve, auc
+import sklearn
 
 def auc_curve(y,prob):
     fpr,tpr,_ = roc_curve(y,prob) ###计算真正率和假正率
@@ -95,6 +98,7 @@ if __name__ == '__main__':
         y_scores = output1.cpu().detach().numpy()
         pr_curve(y_true,y_scores)
         auc_curve(y_true,y_scores)
+        print( "f1_score", sklearn.metrics.f1_score(y_true, y_scores))
         # print(output.shape)
         # print(y_label.shape)
         _, preds = output.max(1)
