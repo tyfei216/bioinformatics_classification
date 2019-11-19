@@ -41,7 +41,7 @@ class EntryFlow(nn.Module):
 
         super().__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding=1, bias=False),
+            nn.Conv2d(1, 32, 3, padding=1, bias=False),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True)
         )

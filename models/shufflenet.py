@@ -173,7 +173,7 @@ class ShuffleNet(nn.Module):
         elif groups == 8:
             out_channels = [24, 384, 768, 1536]
 
-        self.conv1 = BasicConv2d(3, out_channels[0], 3, padding=1, stride=1)
+        self.conv1 = BasicConv2d(1, out_channels[0], 3, padding=1, stride=1)
         self.input_channels = out_channels[0]
 
         self.stage2 = self._make_stage(

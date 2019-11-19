@@ -246,7 +246,7 @@ class NasNetA(nn.Module):
         super().__init__()
 
         self.stem = nn.Sequential(
-            nn.Conv2d(3, stemfilter, 3, padding=1, bias=False),
+            nn.Conv2d(1, stemfilter, 3, padding=1, bias=False),
             nn.BatchNorm2d(stemfilter)
         )
 

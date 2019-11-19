@@ -76,7 +76,7 @@ class DenseNet(nn.Module):
         #For convolutional layers with kernel size 3×3, each 
         #side of the inputs is zero-padded by one pixel to keep 
         #the feature-map size fixed.
-        self.conv1 = nn.Conv2d(3, inner_channels, kernel_size=3, padding=1, bias=False) 
+        self.conv1 = nn.Conv2d(1, inner_channels, kernel_size=3, padding=1, bias=False) 
 
         self.features = nn.Sequential()
 

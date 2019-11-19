@@ -52,7 +52,7 @@ class SqueezeNet(nn.Module):
 
         super().__init__()
         self.stem = nn.Sequential(
-            nn.Conv2d(3, 96, 3, padding=1),
+            nn.Conv2d(1, 96, 3, padding=1),
             nn.BatchNorm2d(96),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2)

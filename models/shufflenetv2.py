@@ -113,7 +113,7 @@ class ShuffleNetV2(nn.Module):
             ValueError('unsupported ratio number')
         
         self.pre = nn.Sequential(
-            nn.Conv2d(3, 24, 3, padding=1),
+            nn.Conv2d(1, 24, 3, padding=1),
             nn.BatchNorm2d(24)
         )
 

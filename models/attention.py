@@ -303,7 +303,7 @@ class Attention(nn.Module):
         
         super().__init__()
         self.pre_conv = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )

@@ -74,7 +74,7 @@ class MobileNet(nn.Module):
 
        alpha = width_multiplier
        self.stem = nn.Sequential(
-           BasicConv2d(3, int(32 * alpha), 3, padding=1, bias=False),
+           BasicConv2d(1, int(32 * alpha), 3, padding=1, bias=False),
            DepthSeperabelConv2d(
                int(32 * alpha),
                int(64 * alpha),

@@ -115,7 +115,7 @@ class SEResNet(nn.Module):
         self.in_channels = 64
 
         self.pre = nn.Sequential(
-            nn.Conv2d(3, 64, 3, padding=1),
+            nn.Conv2d(1, 64, 3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )

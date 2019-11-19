@@ -21,29 +21,32 @@ def picdump(filename, obj):
 
 image_size = 32
 
+def gettransc():
+    transc =  transforms.Compose([
+        transforms.Resize(image_size),
+        transforms.CenterCrop(image_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[.5], std=[.5])
+    ])
+    return transc
 
-transc =  transforms.Compose([
-    transforms.Resize(image_size),
-    transforms.CenterCrop(image_size),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[.5], std=[.5])
-])
-
-trans =  transforms.Compose([
-    # transforms.Resize(image_size),
-    # transforms.CenterCrop(image_size),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[.5], std=[.5])
-])
+def gettrans():
+    trans =  transforms.Compose([
+        # transforms.Resize(image_size),
+        # transforms.CenterCrop(image_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[.5], std=[.5])
+    ])
+    return trans
 
 class dataset2(data.Dataset):
     def __init__(self, pathpos, pathneg, corp, transforms=None):
         super(dataset2).__init__()
         if transforms == None:
             if corp:
-                self.transforms = transc
+                self.transforms = gettransc()
             else:
-                self.transforms = trans
+                self.transforms = gettrans()
         img1 = os.listdir(pathpos)
         self.pos = [os.path.join(pathpos, i) for i in img1]
         # print(self.pos)
@@ -106,7 +109,7 @@ class dataset2(data.Dataset):
 
 class dataset3(data.Dataset):
     def __init__(self, pathpos1, pathneg1, pathpos2, pathneg2, corp, transforms):
-        super(dataset2).__init__()
+        super(dataset3).__init__()
         img1 = os.listdir(pathpos1)
         self.pos1 = [os.path.join(pathpos1, i) for i in img1]
         # print(self.pos1)
@@ -129,7 +132,7 @@ class dataset3(data.Dataset):
         self.transforms = None
         if transforms == None:
             if corp:
-                self.transforms = transc
+                self.transforms = gettransc()
             else:
                 print("here!")
                 self.transforms = trans
@@ -147,7 +150,7 @@ class dataset3(data.Dataset):
                 if self.transforms:
                     img_out = self.transforms(img_out)
                 img = torch.from_numpy(np.asarray(img_out))
-                return img, np.asarray([1,0,0])
+                return img, 0
             else:
                 # print("in else")
                 img = cv2.imread(imgpath)
@@ -157,7 +160,7 @@ class dataset3(data.Dataset):
                     img = self.transforms(img_out)
                 img = torch.from_numpy(np.asarray(img))
                 # print(img.shape)
-                return img, np.asarray([1,0,0])
+                return img, 0
         index -= len(self.neg)
         if index < len(self.pos1):
             imgpath = self.pos1[index]
@@ -169,7 +172,7 @@ class dataset3(data.Dataset):
                 if self.transforms:
                     img_out = self.transforms(img_out)
                 img = torch.from_numpy(np.asarray(img_out))
-                return img, np.asarray([0,1,0])
+                return img, 1
             else:
                 # print("in else")
                 img = cv2.imread(imgpath)
@@ -179,7 +182,7 @@ class dataset3(data.Dataset):
                     img = self.transforms(img_out)
                 img = torch.from_numpy(np.asarray(img))
                 # print(img.shape)
-                return img, np.asarray([0,1,0])
+                return img, 1
         index -= len(self.pos1)
         if index <= len(self.pos2):
             imgpath = self.pos2[index]
@@ -191,7 +194,7 @@ class dataset3(data.Dataset):
                 if self.transforms:
                     img_out = self.transforms(img_out)
                 img = torch.from_numpy(np.asarray(img_out))
-                return img, np.asarray([0,0,1])
+                return img, 2
             else:
                 # print("in else")
                 img = cv2.imread(imgpath)
@@ -201,7 +204,7 @@ class dataset3(data.Dataset):
                     img = self.transforms(img_out)
                 img = torch.from_numpy(np.asarray(img))
                 # print(img.shape)
-                return img, np.asarray([0,0,1])
+                return img, 2
         
     def __len__(self):
         return len(self.pos1)+len(self.neg)+len(self.pos2) 
@@ -221,13 +224,13 @@ def getdataset3(pathpos1, pathneg1, pathpos2, pathneg2, batchSize, split=None, t
     train_sampler = data.SubsetRandomSampler(train_indices)
     test_sampler = data.SubsetRandomSampler(test_indices)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=batchSize, 
-                                           sampler=train_sampler,shuffle=True)
+                                           sampler=train_sampler)
     if iftest:
         test_loader = torch.utils.data.DataLoader(dataset, batch_size=split, 
-                                           sampler=test_sampler,shuffle=True)
+                                           sampler=test_sampler)
     else:
         test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
-                                           sampler=test_sampler,shuffle=True)
+                                           sampler=test_sampler)
     return train_loader, test_loader, indices
 
 def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp = False, iftest=True):

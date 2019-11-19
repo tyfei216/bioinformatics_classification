@@ -111,7 +111,7 @@ class ResnetInResneet(nn.Module):
         super().__init__()
         base = int(96 / 2)
         self.residual_pre_conv = nn.Sequential(
-            nn.Conv2d(3, base, 3, padding=1),
+            nn.Conv2d(1, base, 3, padding=1),
             nn.BatchNorm2d(base),
             nn.ReLU(inplace=True)
         )

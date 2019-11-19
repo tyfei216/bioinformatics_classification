@@ -137,6 +137,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     image_size = args.imgs
+    settings.IMAGE_SIZE = args.imgs
     net = get_network(args, use_gpu=args.gpu)
     trainset, testset,_ = getdataset2("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg", args.b, args.split, None, True)    
     
