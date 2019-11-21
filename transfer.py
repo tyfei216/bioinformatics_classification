@@ -150,11 +150,11 @@ if __name__ == '__main__':
         parm.requires_grad = False
 
     for name, parm in net.named_parameters():
-        if "classifier" in str(name):
+        if "class" in str(name):
             parm.requires_grad = True
 
-    for parm in net.parameters():
-        print(parm)
+    #for parm in net.parameters():
+    #    print(parm)
 
     # exit(0)
         
@@ -210,7 +210,7 @@ if __name__ == '__main__':
         acc = eval_training(epoch)
 
         #start to save best performance model after learning rate decay to 0.01 
-        if epoch > 30 and best_acc < acc:
+        if best_acc < acc:
             torch.save(net.state_dict(), checkpoint_path.format(net=args.net, epoch=epoch, type='best'))
             best_acc = acc
             continue

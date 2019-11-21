@@ -126,21 +126,35 @@ if __name__ == '__main__':
     parser.add_argument('-gpu', type=bool, default=True, help='use gpu or not')
     parser.add_argument('-w', type=int, default=2, help='number of workers for dataloader')
     parser.add_argument('-b', type=int, default=8, help='batch size for dataloader')
+    parser.add_argument('-weights', type=str, default="", help='the weights file you want to test')
     # parser.add_argument('-s', type=bool, default=True, help='whether shuffle the dataset')
     parser.add_argument('-warm', type=int, default=1, help='warm up training phase')
+    parser.add_argument('-poslabel', type=int, default=1, help="the label for pos")
     parser.add_argument('-lr', type=float, default=0.001, help='initial learning rate')
     parser.add_argument("-cp", type=str,default="checkpoints",help="save models")
-    parser.add_argument("-label",type=str,default="",help="label of checkpoints")
+    parser.add_argument("-label",type=str,default=None,help="label of checkpoints")
     parser.add_argument("-nc",type=int,default=2,help="num of classes")
     parser.add_argument("-imgs",type=int,default=32,help="imagesize")
     parser.add_argument("-split",type=str,default=None,help="the split dataset")
+    parser.add_argument("-ds", type=int,default=2,help="which dataset")
     args = parser.parse_args()
     
     image_size = args.imgs
     settings.IMAGE_SIZE = args.imgs
     net = get_network(args, use_gpu=args.gpu)
-    trainset, testset,_ = getdataset2("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg", args.b, args.split, None, True)    
-    
+    if args.ds == 2:
+        trainset, testset,_ = getdataset2("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg", args.b, args.split, None, True, False, args.poslabel)
+    elif args.ds == 3:
+        trainset, testset,_ = getdataset3("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg",
+        "..\\..\\datasets\\hemorrhage\\pos","..\\..\\datasets\\hemorrhage\\neg",args.b, args.split, None, True, False)
+    elif args.ds == 4:
+        trainset, testset,_ = getdataset2("..\\..\\datasets\\all\\pos", "..\\..\\datasets\\all\\neg", args.b, args.split, None, True, False, args.poslabel)
+    elif args.ds == 5:
+        trainset, testset,_ = getdataset2("..\\..\\datasets\\hemorrhage\\pos", "..\\..\\datasets\\hemorrhage\\neg", args.b, args.split, None, True, False, args.poslabel)
+    if args.weights: 
+        net.load_state_dict(torch.load(args.weights), args.gpu)
+
+
     trainset_size = len(trainset.dataset) - len(trainset.dataset) // SPLIT_SIZE
     testset_size = len(trainset.dataset) // SPLIT_SIZE
     
@@ -178,7 +192,7 @@ if __name__ == '__main__':
         acc = eval_training(epoch)
 
         #start to save best performance model after learning rate decay to 0.01 
-        if epoch > 100 and best_acc < acc:
+        if best_acc < acc:
             torch.save(net.state_dict(), checkpoint_path.format(net=args.net, epoch=epoch, type='best'))
             best_acc = acc
             continue

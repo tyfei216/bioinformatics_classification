@@ -29,6 +29,7 @@ import sklearn
 def auc_curve(y,prob):
     fpr,tpr,_ = roc_curve(y,prob) ###计算真正率和假正率
     roc_auc = auc(fpr,tpr) ###计算auc的值
+    print("value: ", roc_auc)
     plt.figure()
     lw = 2
     plt.figure(figsize=(10,10))
@@ -41,7 +42,7 @@ def auc_curve(y,prob):
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")
     plt.savefig("./results/"+args.name+"aoc.jpg")
-    # plt.show()
+    plt.show()
 
 def pr_curve(y,prob):
     precision, recall,_ = precision_recall_curve(y, prob)
@@ -52,7 +53,7 @@ def pr_curve(y,prob):
     plt.figure(1)
     plt.plot(precision, recall)
     plt.savefig("./results/"+args.name+"pr.jpg")
-    # plt.show()
+    plt.show()
 
 if __name__ == '__main__':
 
@@ -66,11 +67,23 @@ if __name__ == '__main__':
     parser.add_argument("-nc",type=int,default=2,help="num of classes")
     parser.add_argument('-s', type=bool, default=True, help='whether shuffle the dataset')
     parser.add_argument("-split", type=str,help="give split")
+    parser.add_argument("-ds", type=int,default=2,help="which dataset")
     parser.add_argument("-name",type=str,help="give name")
     args = parser.parse_args()
+    image_size = args.imgs
 
-    trainset, testset,_ = getdataset2("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg", args.b, args.split, None, True, False)
-
+    if args.ds == 2:
+        trainset, testset,_ = getdataset2("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg", args.b, args.split, None, True, False)
+    elif args.ds == 3:
+        trainset, testset,_ = getdataset3("..\\..\\datasets\\tumor\\pos", "..\\..\\datasets\\tumor\\neg",
+        "..\\..\\datasets\\hemorrhage\\pos","..\\..\\datasets\\hemorrhage\\neg",args.b, args.split, None, True, False)
+    elif args.ds == 4:
+        trainset, testset,_ = getdataset2("..\\..\\datasets\\all\\pos", "..\\..\\datasets\\all\\neg", args.b, args.split, None, True, False, args.poslabel)
+    elif args.ds == 5:
+        trainset, testset,_ = getdataset2("..\\..\\datasets\\hemorrhage\\pos", "..\\..\\datasets\\hemorrhage\\neg", args.b, args.split, None, True, False, args.poslabel)
+    elif args.ds == 6:
+        testset = getdataset("..\\..\\datasets\\hemorrhage\\pos","..\\..\\datasets\\hemorrhage\\neg")
+    
     testset_size = len(testset.dataset)//5
 
     net = get_network(args)
@@ -81,6 +94,11 @@ if __name__ == '__main__':
 
     
     correct = 0.0
+
+    y_trueA = np.zeros((0),dtype=int)
+    y_scoreA = np.zeros((0),dtype=float)
+    predA = np.zeros((0),dtype=int)
+
     for n_iter, (image, label) in enumerate(testset):
         # print("iteration: {}\ttotal {} iterations".format(n_iter + 1, len(cifar100_test_loader)))
         image = Variable(image).cuda()
@@ -89,14 +107,23 @@ if __name__ == '__main__':
         output = net(image)
         output1 = output[:,1]
         y_scores = output1.cpu().detach().numpy()
-        pr_curve(y_true,y_scores)
-        auc_curve(y_true,y_scores)
-        print( "f1_score", sklearn.metrics.f1_score(y_true, y_scores))
+        y_scoreA = np.concatenate((y_scoreA, y_scores))
+        y_trueA = np.concatenate((y_trueA, y_true))
+        # pr_curve(y_true,y_scores)
+        # auc_curve(y_true,y_scores)
+        # print( "f1_score", sklearn.metrics.f1_score(y_true, y_scores))
         # print(output.shape)
         # print(y_label.shape)
         _, preds = output.max(1)
+        pred = preds.cpu().detach().numpy()
+        predA = np.concatenate((predA, pred)) 
         correct += preds.eq(label).sum()
+    # pr_curve(y_trueA,y_scoreA)
+    # print(y_trueA)
+    # auc_curve(y_trueA,y_scoreA)
+    print( "f1_score micro", sklearn.metrics.f1_score(y_trueA, predA,average='micro'))
+    print( "f1_score macro", sklearn.metrics.f1_score(y_trueA, predA,average='macro'))
     print('Test set: Accuracy: {:.4f}'.format(
-        correct.float() / testset_size
+        correct.float() / testset_size 
     ))
 

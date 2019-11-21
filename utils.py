@@ -132,7 +132,12 @@ def get_network(args, use_gpu=True):
     elif args.net == 'seresnet152':
         from models.senet import seresnet152
         net = seresnet152()
-
+    elif args.net == 'vggno':
+        from models.vgg_dropout import vgg19_bn_ND
+        net = vgg19_bn_ND(args)
+    elif args.net == 'resnet101_NO':
+        from models.resnet_dropout import resnet101_NO
+        net = resnet101_NO(args)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()

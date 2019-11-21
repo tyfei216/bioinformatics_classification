@@ -40,7 +40,7 @@ def gettrans():
     return trans
 
 class dataset2(data.Dataset):
-    def __init__(self, pathpos, pathneg, corp, transforms=None):
+    def __init__(self, pathpos, pathneg, corp, transforms=None, poslabel = 1):
         super(dataset2).__init__()
         if transforms == None:
             if corp:
@@ -50,7 +50,7 @@ class dataset2(data.Dataset):
         img1 = os.listdir(pathpos)
         self.pos = [os.path.join(pathpos, i) for i in img1]
         # print(self.pos)
-        
+        self.poslabel = poslabel
         img2 = os.listdir(pathneg)
         self.neg = [os.path.join(pathneg, i) for i in img2]
         # print(self.neg)
@@ -135,7 +135,7 @@ class dataset3(data.Dataset):
                 self.transforms = gettransc()
             else:
                 print("here!")
-                self.transforms = trans
+                self.transforms = gettrans()
         print(self.transforms)
         self.corp = not corp
 
@@ -209,6 +209,11 @@ class dataset3(data.Dataset):
     def __len__(self):
         return len(self.pos1)+len(self.neg)+len(self.pos2) 
 
+def getdataset(pathpos, pathneg, b=8, transforms = None, crop = False):
+    dataset = dataset2(pathpos, pathneg, False, transforms)
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=b, 
+                                           shuffle=True)
+    return train_loader
 
 def getdataset3(pathpos1, pathneg1, pathpos2, pathneg2, batchSize, split=None, transforms = None, corp = False, iftest = False):
     dataset = dataset3(pathpos1, pathneg1, pathpos2, pathneg2, corp, transforms)
@@ -225,16 +230,16 @@ def getdataset3(pathpos1, pathneg1, pathpos2, pathneg2, batchSize, split=None, t
     test_sampler = data.SubsetRandomSampler(test_indices)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=batchSize, 
                                            sampler=train_sampler)
-    if iftest:
-        test_loader = torch.utils.data.DataLoader(dataset, batch_size=split, 
-                                           sampler=test_sampler)
-    else:
-        test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
-                                           sampler=test_sampler)
+    # if iftest:
+    #    test_loader = torch.utils.data.DataLoader(dataset, batch_size=split, 
+    #                                       sampler=test_sampler)
+    # else:
+    test_loader = torch.utils.data.DataLoader(dataset, batch_size=8, 
+                                        sampler=test_sampler)
     return train_loader, test_loader, indices
 
-def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp = False, iftest=True):
-    dataset = dataset2(pathpos, pathneg, corp, transforms)
+def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp = False, iftest=True, poslabel=1):
+    dataset = dataset2(pathpos, pathneg, corp, transforms, poslabel)
     if split:
         indices = picload(split)
     else:
@@ -249,10 +254,10 @@ def getdataset2(pathpos, pathneg, batchSize, split=None, transforms = None, corp
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=batchSize, 
                                            sampler=train_sampler)
     if iftest:
-        test_loader = torch.utils.data.DataLoader(dataset, batch_size=1, 
+        test_loader = torch.utils.data.DataLoader(dataset, batch_size=8, 
                                            sampler=test_sampler)
     else:
-        test_loader = torch.utils.data.DataLoader(dataset, batch_size=split, 
+        test_loader = torch.utils.data.DataLoader(dataset, batch_size=8, 
                                            sampler=test_sampler)
     return train_loader, test_loader, indices
 
